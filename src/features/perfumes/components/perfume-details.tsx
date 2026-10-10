@@ -1,19 +1,27 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { ChevronLeftIcon } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
 import { Reveal } from "@/components/motion/reveal";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckoutPanel } from "@/features/checkout/components/checkout-panel";
 import { RatingStars } from "@/features/reviews/components/rating-stars";
 import { formatPrice } from "@/lib/format";
-import type { Perfume } from "../types";
+import type { Perfume, VariantId } from "../types";
 import { FragranceNotes } from "./fragrance-notes";
 import { PerfumeGallery } from "./perfume-gallery";
+import { PriceTag } from "./price-tag";
 import { StockBadge } from "./stock-badge";
 
 export function PerfumeDetails({ perfume }: { perfume: Perfume }) {
+  const [variantId, setVariantId] = useState<VariantId>(perfume.variants[0].id);
+  const variant = perfume.variants.find((v) => v.id === variantId) ?? perfume.variants[0];
+
   return (
     <section
       className="relative overflow-hidden"
@@ -33,7 +41,8 @@ export function PerfumeDetails({ perfume }: { perfume: Perfume }) {
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
           {/* Left: image gallery */}
           <Reveal variant="scale" className="lg:sticky lg:top-24 lg:self-start">
-            <PerfumeGallery images={perfume.images} />
+            {/* key: start from the first picture whenever the size changes */}
+            <PerfumeGallery key={variant.id} images={variant.images} />
           </Reveal>
 
           {/* Right: details */}
@@ -54,11 +63,29 @@ export function PerfumeDetails({ perfume }: { perfume: Perfume }) {
 
             <Separator />
 
+            <div className="space-y-2">
+              <h3 className="text-xs tracking-widest text-muted-foreground uppercase">Choose size</h3>
+              <Tabs value={variant.id} onValueChange={(v) => setVariantId(v as VariantId)}>
+                <TabsList className="h-auto! w-fit gap-1 p-1">
+                  {perfume.variants.map((v) => (
+                    <TabsTrigger key={v.id} value={v.id} className="h-8 gap-1.5 px-3 text-xs sm:px-4 sm:text-sm">
+                      <span className="font-semibold">{v.label}</span>
+                      <span className="font-normal opacity-70">{formatPrice(v.price)}</span>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+
             <dl className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <dt className="text-xs tracking-widest text-muted-foreground uppercase">Price</dt>
-                <dd className="text-3xl font-semibold">{formatPrice(perfume.price)}</dd>
-                <dd className="text-xs text-muted-foreground">{perfume.sizeMl} ml, inclusive of taxes</dd>
+                <dd>
+                  <PriceTag price={variant.price} mrp={variant.mrp} size="lg" />
+                </dd>
+                <dd className="text-xs text-muted-foreground">
+                  {variant.sizeLabel}, inclusive of taxes &middot; you save {formatPrice(variant.mrp - variant.price)}
+                </dd>
               </div>
               <div className="space-y-1">
                 <dt className="text-xs tracking-widest text-muted-foreground uppercase">Quantity available</dt>
@@ -80,7 +107,7 @@ export function PerfumeDetails({ perfume }: { perfume: Perfume }) {
 
             <Separator />
 
-            <CheckoutPanel perfume={perfume} />
+            <CheckoutPanel perfume={perfume} variant={variant} />
           </div>
         </div>
       </Container>

@@ -36,14 +36,15 @@ function groupByDealer(items: CartItem[]) {
 export function CartSheet() {
   const { items, totalItems, subtotal, hydrated, setQuantity, removeItem } = useCart();
   const groups = groupByDealer(items);
+  const savings = items.reduce((sum, i) => sum + (i.mrp - i.price) * i.quantity, 0);
 
   const checkout = (dealer: Dealer, dealerItems: CartItem[]) =>
     openWhatsAppCheckout({
       dealer,
       lines: dealerItems.map((i) => ({
-        id: i.perfumeId,
+        id: `${i.perfumeId}-${i.variantId}`,
         name: i.name,
-        sizeMl: i.sizeMl,
+        size: i.sizeLabel,
         price: i.price,
         quantity: i.quantity,
       })),
@@ -93,7 +94,7 @@ export function CartSheet() {
                   )}
                   <ul className="space-y-4">
                     {dealerItems.map((item) => (
-                      <li key={item.perfumeId} className="flex gap-3">
+                      <li key={item.lineId} className="flex gap-3">
                         <SheetClose asChild>
                           <Link
                             href={`/perfumes/${item.slug}`}
@@ -107,14 +108,15 @@ export function CartSheet() {
                             <div>
                               <p className="font-medium">{item.name}</p>
                               <p className="text-xs text-muted-foreground">
-                                {item.sizeMl} ml &middot; {formatPrice(item.price)}
+                                {item.sizeLabel} &middot; {formatPrice(item.price)}{" "}
+                                {item.mrp > item.price && <s className="text-muted-foreground/70">{formatPrice(item.mrp)}</s>}
                               </p>
                             </div>
                             <Button
                               variant="ghost"
                               size="icon-sm"
                               aria-label={`Remove ${item.name}`}
-                              onClick={() => removeItem(item.perfumeId)}
+                              onClick={() => removeItem(item.lineId)}
                             >
                               <XIcon />
                             </Button>
@@ -124,7 +126,7 @@ export function CartSheet() {
                               size="sm"
                               quantity={item.quantity}
                               max={item.stock}
-                              onChange={(q) => setQuantity(item.perfumeId, q)}
+                              onChange={(q) => setQuantity(item.lineId, q)}
                               className="h-8 w-28"
                             />
                             <span className="text-sm font-semibold">{formatPrice(item.price * item.quantity)}</span>
@@ -147,6 +149,12 @@ export function CartSheet() {
                 <span>Subtotal</span>
                 <span className="font-semibold">{formatPrice(subtotal)}</span>
               </div>
+              {savings > 0 && (
+                <div className="flex items-center justify-between text-sm text-gold">
+                  <span>You save</span>
+                  <span className="font-medium">{formatPrice(savings)}</span>
+                </div>
+              )}
               {groups.length === 1 ? (
                 <Button size="lg" className="h-12 w-full text-base" onClick={() => checkout(groups[0].dealer, groups[0].items)}>
                   Proceed to checkout

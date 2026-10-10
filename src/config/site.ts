@@ -7,10 +7,10 @@ export const siteConfig = {
   currency: "INR",
   locale: "en-IN",
   /** Fallback dealer number (international format, digits only) used when a perfume has no dealer of its own. */
-  defaultWhatsAppNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "919999999999",
+  defaultWhatsAppNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "917757902771",
   contact: {
-    email: "hello@7seven.example",
-    phone: "+91 99999 99999",
+    email: "sevynperfumes7@gmail.com",
+    phone: "+91 77579 02771",
     address: "Mumbai, India",
   },
   nav: [

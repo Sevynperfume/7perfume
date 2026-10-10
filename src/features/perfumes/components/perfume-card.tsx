@@ -5,12 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { AddToCartButton } from "@/features/cart/components/add-to-cart-button";
 import { RatingStars } from "@/features/reviews/components/rating-stars";
-import { formatPrice } from "@/lib/format";
 import type { Perfume } from "../types";
+import { PriceTag } from "./price-tag";
 
 export function PerfumeCard({ perfume }: { perfume: Perfume }) {
   const href = `/perfumes/${perfume.slug}`;
   const soldOut = perfume.stock <= 0;
+  const variant = perfume.variants[0];
+  const off = Math.round(((variant.mrp - variant.price) / variant.mrp) * 100);
 
   return (
     <Card className="group h-full gap-0 overflow-hidden bg-card py-0 transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/10 hover:ring-gold/60">
@@ -31,6 +33,11 @@ export function PerfumeCard({ perfume }: { perfume: Perfume }) {
           <Badge variant="secondary" className="bg-background/85 backdrop-blur">{perfume.gender}</Badge>
           {soldOut && <Badge variant="destructive">Sold out</Badge>}
         </div>
+        {off > 0 && (
+          <span className="absolute top-3 right-3 rounded-full bg-gold px-2.5 py-1 text-[11px] font-semibold text-noir shadow-sm">
+            {off}% OFF
+          </span>
+        )}
       </Link>
 
       <CardContent className="flex flex-1 flex-col gap-2 pt-4 pb-5">
@@ -49,13 +56,16 @@ export function PerfumeCard({ perfume }: { perfume: Perfume }) {
         </Link>
         <p className="line-clamp-1 text-sm text-muted-foreground">{perfume.tagline}</p>
         <p className="mt-auto text-xs text-muted-foreground">
-          {perfume.sizeMl} ml &middot; {perfume.concentration}
+          {perfume.concentration} &middot; {perfume.variants.map((v) => v.label).join(" / ")}
         </p>
       </CardContent>
 
       <CardFooter className="justify-between gap-3 border-t px-4 py-4 sm:px-5">
-        <span className="text-lg font-semibold">{formatPrice(perfume.price)}</span>
-        <AddToCartButton perfume={perfume} size="sm" className="w-32" />
+        <span className="flex flex-col leading-tight">
+          <span className="text-[10px] tracking-widest text-muted-foreground uppercase">{variant.label}</span>
+          <PriceTag price={variant.price} mrp={variant.mrp} size="sm" showSaving={false} />
+        </span>
+        <AddToCartButton perfume={perfume} variant={variant} size="sm" className="w-32" />
       </CardFooter>
     </Card>
   );

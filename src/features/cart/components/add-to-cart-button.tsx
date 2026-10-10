@@ -3,21 +3,23 @@
 import { ShoppingBagIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import type { Perfume } from "@/features/perfumes/types";
+import type { Perfume, PerfumeVariant } from "@/features/perfumes/types";
 import { cn } from "@/lib/utils";
-import { useCart } from "../store/cart-context";
+import { lineIdOf, useCart } from "../store/cart-context";
 import { QuantityStepper } from "./quantity-stepper";
 
 interface AddToCartButtonProps {
   perfume: Perfume;
+  /** Size to add; defaults to the perfume's first (default) size. */
+  variant?: PerfumeVariant;
   size?: "sm" | "lg";
   className?: string;
 }
 
 /** Shows "Add to cart" until the item is in the cart, then swaps to a quantity stepper. */
-export function AddToCartButton({ perfume, size = "lg", className }: AddToCartButtonProps) {
+export function AddToCartButton({ perfume, variant = perfume.variants[0], size = "lg", className }: AddToCartButtonProps) {
   const { getQuantity, addItem, setQuantity } = useCart();
-  const quantity = getQuantity(perfume.id);
+  const quantity = getQuantity(perfume.id, variant.id);
   const soldOut = perfume.stock <= 0;
   const height = size === "lg" ? "h-12" : "h-9";
 
@@ -26,7 +28,7 @@ export function AddToCartButton({ perfume, size = "lg", className }: AddToCartBu
       <QuantityStepper
         quantity={quantity}
         max={perfume.stock}
-        onChange={(q) => setQuantity(perfume.id, q)}
+        onChange={(q) => setQuantity(lineIdOf(perfume.id, variant.id), q)}
         size={size}
         className={cn(height, className)}
       />
@@ -38,7 +40,7 @@ export function AddToCartButton({ perfume, size = "lg", className }: AddToCartBu
       size="lg"
       variant={size === "lg" ? "outline" : "default"}
       disabled={soldOut}
-      onClick={() => addItem(perfume)}
+      onClick={() => addItem(perfume, variant)}
       className={cn(height, "px-4", className)}
     >
       <ShoppingBagIcon data-icon="inline-start" />

@@ -4,25 +4,25 @@ import { WhatsAppIcon } from "@/components/icons/whatsapp-icon";
 import { Button } from "@/components/ui/button";
 import { AddToCartButton } from "@/features/cart/components/add-to-cart-button";
 import { useCart } from "@/features/cart/store/cart-context";
-import type { Perfume } from "@/features/perfumes/types";
+import type { Perfume, PerfumeVariant } from "@/features/perfumes/types";
 import { formatPrice } from "@/lib/format";
 import { openWhatsAppCheckout } from "../lib/whatsapp";
 
-export function CheckoutPanel({ perfume }: { perfume: Perfume }) {
+export function CheckoutPanel({ perfume, variant }: { perfume: Perfume; variant: PerfumeVariant }) {
   const { getQuantity } = useCart();
   const soldOut = perfume.stock <= 0;
   // Buy-now uses the quantity already chosen in the cart, or 1.
-  const quantity = Math.max(1, getQuantity(perfume.id));
+  const quantity = Math.max(1, getQuantity(perfume.id, variant.id));
 
   const handleCheckout = () =>
     openWhatsAppCheckout({
       dealer: perfume.dealer,
       lines: [
         {
-          id: perfume.id,
+          id: `${perfume.id}-${variant.id}`,
           name: perfume.name,
-          sizeMl: perfume.sizeMl,
-          price: perfume.price,
+          size: variant.sizeLabel,
+          price: variant.price,
           quantity,
         },
       ],
@@ -32,7 +32,7 @@ export function CheckoutPanel({ perfume }: { perfume: Perfume }) {
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
-        <AddToCartButton perfume={perfume} className="w-full" />
+        <AddToCartButton perfume={perfume} variant={variant} className="w-full" />
         <Button size="lg" className="h-12 w-full text-base" disabled={soldOut} onClick={handleCheckout}>
           {!soldOut && <WhatsAppIcon />}
           {soldOut ? "Out of stock" : "Proceed to checkout"}
@@ -40,8 +40,8 @@ export function CheckoutPanel({ perfume }: { perfume: Perfume }) {
       </div>
       {!soldOut && (
         <p className="text-sm text-muted-foreground">
-          {quantity} x {formatPrice(perfume.price)} ={" "}
-          <span className="font-semibold text-foreground">{formatPrice(perfume.price * quantity)}</span>
+          {variant.sizeLabel}: {quantity} x {formatPrice(variant.price)} ={" "}
+          <span className="font-semibold text-foreground">{formatPrice(variant.price * quantity)}</span>
         </p>
       )}
       <p className="text-xs text-muted-foreground">

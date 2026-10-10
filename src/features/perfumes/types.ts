@@ -31,6 +31,23 @@ export interface Dealer {
   whatsappNumber: string;
 }
 
+export type VariantId = "50ml" | "30ml" | "pocket";
+
+/** One bottle size of a perfume, with its own price and pictures (a future `perfume_variants` table). */
+export interface PerfumeVariant {
+  id: VariantId;
+  /** Short tab label, e.g. "50 ml" or "Pocket". */
+  label: string;
+  /** Size as shown to customers and in WhatsApp orders, e.g. "50 ml" or "Pocket size". */
+  sizeLabel: string;
+  /** Regular price, shown struck through. */
+  mrp: number;
+  /** Selling price. */
+  price: number;
+  /** Gallery for this size; the first image is the cover. */
+  images: PerfumeImage[];
+}
+
 /**
  * Shape mirrors a future `perfumes` table. Keep fields flat and serialisable
  * so the same type works for mock data, a REST API or an ORM model.
@@ -42,9 +59,8 @@ export interface Perfume {
   brand: string;
   tagline: string;
   description: string;
-  price: number;
-  /** Bottle size in millilitres */
-  sizeMl: number;
+  /** Sizes on sale. The first one is the default shown on cards and the carousel. */
+  variants: PerfumeVariant[];
   /** Units in stock */
   stock: number;
   concentration: "Extrait de Parfum" | "Eau de Parfum" | "Eau de Toilette" | "Parfum" | "Attar";
@@ -52,7 +68,7 @@ export interface Perfume {
   family: FragranceFamily;
   /** Brand colour of the scent, used for page tints and accents. */
   tint: string;
-  /** First image is the cover used on cards, carousel and cart. */
+  /** Gallery of the default size. First image is the cover used on cards, carousel and cart. */
   images: PerfumeImage[];
   notes: FragranceNote[];
   dealer: Dealer;

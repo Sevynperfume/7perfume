@@ -1,9 +1,9 @@
 import { perfumeImage } from "@/lib/perfume-image";
-import type { Dealer, FragranceNote, NoteFamily, NoteLayer, Perfume, PerfumeImage } from "../types";
+import type { Dealer, FragranceNote, NoteFamily, NoteLayer, Perfume, PerfumeImage, PerfumeVariant } from "../types";
 
 // Mock data. Replace with a database query inside perfume.service.ts.
 // Notes come from the SEVYN fragrance sheets in /public/seven_perfumes/*_fragnance.svg.
-// Price and stock are placeholders: update them with the real values.
+// Stock is a placeholder: update it with the real values.
 
 // Gallery order: the first image is the cover used on cards, the carousel and the cart.
 const views = [
@@ -14,8 +14,23 @@ const views = [
   { file: "4.svg", label: "scent profile" },
 ];
 
-function gallery(slug: string, name: string): PerfumeImage[] {
-  return views.map((view) => ({ src: perfumeImage(slug, view.file), alt: `${name}, ${view.label}` }));
+/** Images live in /images/perfumes/<slug>/ (50 ml), .../30ml/ and .../pocket/. */
+function gallery(slug: string, name: string, dir = "", size = "50 ml"): PerfumeImage[] {
+  return views.map((view) => ({
+    src: perfumeImage(slug, dir ? `${dir}/${view.file}` : view.file),
+    alt: `${name}, ${size}, ${view.label}`,
+  }));
+}
+
+/** Same sizes and prices for every perfume. mrp is the regular price shown struck through. */
+const SIZES = [
+  { id: "50ml", label: "50 ml", sizeLabel: "50 ml", mrp: 1200, price: 699, dir: "" },
+  { id: "30ml", label: "30 ml", sizeLabel: "30 ml", mrp: 800, price: 350, dir: "30ml" },
+  { id: "pocket", label: "Pocket", sizeLabel: "Pocket size", mrp: 250, price: 150, dir: "pocket" },
+] as const;
+
+function variants(slug: string, name: string): PerfumeVariant[] {
+  return SIZES.map(({ dir, ...size }) => ({ ...size, images: gallery(slug, name, dir, size.sizeLabel) }));
 }
 
 /** Builds the notes list from "Name:family" pairs per layer. */
@@ -31,12 +46,11 @@ function notes(layers: Record<NoteLayer, string[]>): FragranceNote[] {
 const mainDealer: Dealer = {
   id: "dealer-1",
   name: "SEVYN Perfumes",
-  whatsappNumber: "919999999999",
+  whatsappNumber: "917757902771",
 };
 
 const shared = {
   brand: "SEVYN",
-  sizeMl: 50,
   concentration: "Extrait de Parfum",
   dealer: mainDealer,
 } as const;
@@ -50,11 +64,11 @@ export const perfumes: Perfume[] = [
     tagline: "Citrus, mint and a salty breeze",
     description:
       "A day on the coast in a bottle. Beach Please opens with a bright splash of citron, lemon and cool mint, softens into sun-ripened apricot and fresh basil, then dries down to creamy fig and the soft, skin-like musk of ambrette. Light, carefree and made for warm days.",
-    price: 2499,
     stock: 25,
     gender: "Unisex",
     family: "fresh",
     tint: "#3a9cc4",
+    variants: variants("beach-please", "Beach Please"),
     images: gallery("beach-please", "Beach Please"),
     notes: notes({
       top: ["Citron:citrus", "Lemon:citrus", "Mint:fresh"],
@@ -74,11 +88,11 @@ export const perfumes: Perfume[] = [
     tagline: "Rum, leather and smoky incense",
     description:
       "Loud in the best way. Bombastic starts with sparkling bergamot, crackling black pepper and bay leaf, then pours on dark rum and cinnamon warmed by clary sage, African geranium and woods. The base is pure night-out: supple leather, incense smoke, resinous benzoin, patchouli and cedar.",
-    price: 2999,
     stock: 18,
     gender: "Men",
     family: "amber",
     tint: "#9b2c33",
+    variants: variants("bombastic", "Bombastic"),
     images: gallery("bombastic", "Bombastic"),
     notes: notes({
       top: ["Bergamot:citrus", "Black Pepper:spicy", "Bay Leaf:green"],
@@ -98,11 +112,11 @@ export const perfumes: Perfume[] = [
     tagline: "Crisp citrus over sandalwood and amber",
     description:
       "Clean, confident and effortlessly polished. Daddy opens with mint, sparkling aldehydes, lavender and a bright citrus burst of bergamot, mandarin and lemon, lifted by artemisia and neroli. The heart blends airy seagrass and ginger with jasmine, geranium, rosewood, cyclamen and rose, before settling on musk, sandalwood, cedar, guaiac wood and amber.",
-    price: 2999,
     stock: 22,
     gender: "Men",
     family: "fresh",
     tint: "#3d5a78",
+    variants: variants("daddy", "Daddy"),
     images: gallery("daddy", "Daddy"),
     notes: notes({
       top: [
@@ -128,11 +142,11 @@ export const perfumes: Perfume[] = [
     tagline: "Pineapple, apple and warm amber",
     description:
       "Juicy and playful from the first spray. Pista La Vista bursts with lemon, herbal armoise and ripe pineapple, moves into crisp apple and powdery violet with a touch of resinous labdanum, and finishes on a warm, earthy trail of amber and patchouli.",
-    price: 2499,
     stock: 30,
     gender: "Unisex",
     family: "fresh",
     tint: "#7d9a3c",
+    variants: variants("pista-la-vista", "Pista La Vista"),
     images: gallery("pista-la-vista", "Pista La Vista"),
     notes: notes({
       top: ["Lemon:citrus", "Armoise:green", "Pineapple:fruity"],
@@ -152,11 +166,11 @@ export const perfumes: Perfume[] = [
     tagline: "Sweet orange, saffron and oud",
     description:
       "Rich, spiced and quietly opulent. Plump Me Up opens with fresh, sweet orange, then turns warm with spicy pink peppercorn and leathery saffron. Deep, woody agarwood (oud) carries it for hours, made for evenings and special occasions.",
-    price: 3299,
     stock: 12,
     gender: "Unisex",
     family: "woody",
     tint: "#75469a",
+    variants: variants("plump-me-up", "Plump Me Up"),
     images: gallery("plump-me-up", "Plump Me Up"),
     notes: notes({
       top: ["Sweet Orange:citrus"],
@@ -176,11 +190,11 @@ export const perfumes: Perfume[] = [
     tagline: "Cardamom, toffee and amberwood",
     description:
       "Charm, bottled. Rizz-Aro opens with aromatic cardamom, melts into a smooth toffee and caramel accord, and settles on warm, glowing amberwood. Sweet without being sugary, it is a close, cosy gourmand for date nights.",
-    price: 2799,
     stock: 20,
     gender: "Men",
     family: "amber",
     tint: "#b8863b",
+    variants: variants("rizz-aro", "Rizz-Aro"),
     images: gallery("rizz-aro", "Rizz-Aro"),
     notes: notes({
       top: ["Cardamom:spicy"],
@@ -200,11 +214,11 @@ export const perfumes: Perfume[] = [
     tagline: "White peach, jasmine and vanilla",
     description:
       "Soft, romantic and impossible to ignore. Sweet Talk opens with velvety white peach and tangy black currant, blooms into violet and Egyptian jasmine, and dries down to creamy Madagascar vanilla wrapped in clean white musk.",
-    price: 2799,
     stock: 28,
     gender: "Women",
     family: "floral",
     tint: "#c98b86",
+    variants: variants("sweet-talk", "Sweet Talk"),
     images: gallery("sweet-talk", "Sweet Talk"),
     notes: notes({
       top: ["White Peach:fruity", "Black Currant:fruity"],

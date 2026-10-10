@@ -5,7 +5,8 @@ import { formatPrice } from "@/lib/format";
 export interface OrderLine {
   id: string;
   name: string;
-  sizeMl: number;
+  /** e.g. "50 ml" or "Pocket size" */
+  size: string;
   price: number;
   quantity: number;
 }
@@ -22,7 +23,7 @@ export function buildOrderMessage({ dealer, lines, pageUrl }: WhatsAppOrder) {
   const message = [`Hi ${dealer.name}, I would like to order:`, ""];
   lines.forEach((line, i) => {
     message.push(
-      `${i + 1}. ${line.name} (${line.sizeMl} ml)`,
+      `${i + 1}. ${line.name} (${line.size})`,
       `   Product ID: ${line.id}`,
       `   Quantity: ${line.quantity} x ${formatPrice(line.price)} = ${formatPrice(line.price * line.quantity)}`,
     );

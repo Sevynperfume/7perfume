@@ -17,9 +17,9 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Perfume } from "../types";
+import { PriceTag } from "./price-tag";
 
 /**
  * Centered "cascade" carousel: the selected card is raised and full size,
@@ -83,7 +83,12 @@ export function PerfumeCarousel({ perfumes }: { perfumes: Perfume[] }) {
                         </span>
                         <h3 className="font-heading text-2xl font-semibold">{perfume.name}</h3>
                         <p className="text-sm text-muted-foreground">{perfume.tagline}</p>
-                        <p className="text-lg font-semibold">{formatPrice(perfume.price)}</p>
+                        <PriceTag
+                          price={perfume.variants[0].price}
+                          mrp={perfume.variants[0].mrp}
+                          className="justify-center"
+                        />
+                        <p className="text-xs text-muted-foreground">{perfume.variants[0].label} &middot; also in {perfume.variants.slice(1).map((v) => v.label).join(" & ")}</p>
                         <Button asChild size="lg" className="mt-2 h-10 px-6" tabIndex={active ? 0 : -1}>
                           <Link href={href}>Discover</Link>
                         </Button>

@@ -2,16 +2,19 @@
 
 import { createContext, useContext, useEffect, useMemo, useReducer } from "react";
 
-import type { Perfume } from "@/features/perfumes/types";
+import type { Perfume, PerfumeVariant, VariantId } from "@/features/perfumes/types";
 import type { CartItem } from "../types";
 
-const STORAGE_KEY = "7seven-cart";
+// v2: cart lines are per size. Carts saved by the old version (no sizes, old prices) are dropped.
+const STORAGE_KEY = "7seven-cart-v2";
+
+export const lineIdOf = (perfumeId: string, variantId: VariantId) => `${perfumeId}:${variantId}`;
 
 type Action =
   | { type: "hydrate"; items: CartItem[] }
-  | { type: "add"; perfume: Perfume; quantity: number }
-  | { type: "setQuantity"; perfumeId: string; quantity: number }
-  | { type: "remove"; perfumeId: string }
+  | { type: "add"; perfume: Perfume; variant: PerfumeVariant; quantity: number }
+  | { type: "setQuantity"; lineId: string; quantity: number }
+  | { type: "remove"; lineId: string }
   | { type: "clear"; dealerId?: string };
 
 function clamp(quantity: number, stock: number) {
@@ -32,11 +35,12 @@ function reducer(state: CartState, action: Action): CartState {
 function itemsReducer(items: CartItem[], action: Exclude<Action, { type: "hydrate" }>): CartItem[] {
   switch (action.type) {
     case "add": {
-      const { perfume } = action;
-      const existing = items.find((i) => i.perfumeId === perfume.id);
+      const { perfume, variant } = action;
+      const lineId = lineIdOf(perfume.id, variant.id);
+      const existing = items.find((i) => i.lineId === lineId);
       if (existing) {
         return items.map((i) =>
-          i.perfumeId === perfume.id ? { ...i, quantity: clamp(i.quantity + action.quantity, i.stock) } : i,
+          i.lineId === lineId ? { ...i, quantity: clamp(i.quantity + action.quantity, i.stock) } : i,
         );
       }
       const quantity = clamp(action.quantity, perfume.stock);
@@ -44,12 +48,15 @@ function itemsReducer(items: CartItem[], action: Exclude<Action, { type: "hydrat
       return [
         ...items,
         {
+          lineId,
           perfumeId: perfume.id,
+          variantId: variant.id,
           slug: perfume.slug,
           name: perfume.name,
-          image: perfume.images[0]?.src ?? "",
-          price: perfume.price,
-          sizeMl: perfume.sizeMl,
+          image: variant.images[0]?.src ?? perfume.images[0]?.src ?? "",
+          sizeLabel: variant.sizeLabel,
+          price: variant.price,
+          mrp: variant.mrp,
           stock: perfume.stock,
           dealer: perfume.dealer,
           quantity,
@@ -58,10 +65,10 @@ function itemsReducer(items: CartItem[], action: Exclude<Action, { type: "hydrat
     }
     case "setQuantity":
       return items
-        .map((i) => (i.perfumeId === action.perfumeId ? { ...i, quantity: clamp(action.quantity, i.stock) } : i))
+        .map((i) => (i.lineId === action.lineId ? { ...i, quantity: clamp(action.quantity, i.stock) } : i))
         .filter((i) => i.quantity > 0);
     case "remove":
-      return items.filter((i) => i.perfumeId !== action.perfumeId);
+      return items.filter((i) => i.lineId !== action.lineId);
     case "clear":
       return action.dealerId ? items.filter((i) => i.dealer.id !== action.dealerId) : [];
   }
@@ -72,10 +79,10 @@ interface CartContextValue {
   hydrated: boolean;
   totalItems: number;
   subtotal: number;
-  getQuantity: (perfumeId: string) => number;
-  addItem: (perfume: Perfume, quantity?: number) => void;
-  setQuantity: (perfumeId: string, quantity: number) => void;
-  removeItem: (perfumeId: string) => void;
+  getQuantity: (perfumeId: string, variantId: VariantId) => number;
+  addItem: (perfume: Perfume, variant: PerfumeVariant, quantity?: number) => void;
+  setQuantity: (lineId: string, quantity: number) => void;
+  removeItem: (lineId: string) => void;
   clearCart: (dealerId?: string) => void;
 }
 
@@ -88,7 +95,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let saved: CartItem[] = [];
     try {
-      saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") as CartItem[];
+      saved = (JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") as CartItem[]).filter((i) => i.lineId);
+      localStorage.removeItem("7seven-cart");
     } catch {
       localStorage.removeItem(STORAGE_KEY);
     }
@@ -105,10 +113,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       hydrated,
       totalItems: items.reduce((sum, i) => sum + i.quantity, 0),
       subtotal: items.reduce((sum, i) => sum + i.price * i.quantity, 0),
-      getQuantity: (perfumeId) => items.find((i) => i.perfumeId === perfumeId)?.quantity ?? 0,
-      addItem: (perfume, quantity = 1) => dispatch({ type: "add", perfume, quantity }),
-      setQuantity: (perfumeId, quantity) => dispatch({ type: "setQuantity", perfumeId, quantity }),
-      removeItem: (perfumeId) => dispatch({ type: "remove", perfumeId }),
+      getQuantity: (perfumeId, variantId) =>
+        items.find((i) => i.lineId === lineIdOf(perfumeId, variantId))?.quantity ?? 0,
+      addItem: (perfume, variant, quantity = 1) => dispatch({ type: "add", perfume, variant, quantity }),
+      setQuantity: (lineId, quantity) => dispatch({ type: "setQuantity", lineId, quantity }),
+      removeItem: (lineId) => dispatch({ type: "remove", lineId }),
       clearCart: (dealerId) => dispatch({ type: "clear", dealerId }),
     }),
     [items, hydrated],
