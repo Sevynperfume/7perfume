@@ -107,7 +107,7 @@ export function PerfumeDetails({ perfume }: { perfume: Perfume }) {
 
             <Separator />
 
-            <CheckoutPanel perfume={perfume} variant={variant} />
+            <CheckoutPanel key={variant.id} perfume={perfume} variant={variant} />
           </div>
         </div>
       </Container>
