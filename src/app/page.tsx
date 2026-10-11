@@ -1,3 +1,4 @@
+import { JsonLd } from "@/components/seo/json-ld";
 import { BrandStory } from "@/features/home/components/brand-story";
 // import { FragranceFamilies } from "@/features/home/components/fragrance-families";
 import { HeroLogoReveal } from "@/features/home/components/hero-logo-reveal";
@@ -7,6 +8,7 @@ import type { HeroStats } from "@/features/home/components/hero-parallax";
 import { PerfumeCarousel } from "@/features/perfumes/components/perfume-carousel";
 import { PerfumeGrid } from "@/features/perfumes/components/perfume-grid";
 import { getAllPerfumes, getFeaturedPerfumes } from "@/features/perfumes/services/perfume.service";
+import { collectionJsonLd } from "@/lib/structured-data";
 
 export default async function HomePage() {
   const [featured, perfumes] = await Promise.all([getFeaturedPerfumes(), getAllPerfumes()]);
@@ -29,6 +31,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={collectionJsonLd(perfumes)} />
       {/* Bottle hero disabled for now. Restore by uncommenting this, its import and heroShades above. */}
       {/* <HeroParallax stats={heroStats} shades={heroShades} /> */}
       <HeroLogoReveal />

@@ -1,4 +1,4 @@
-# 7 Seven Perfume
+# SEVYN Perfumes
 
 Static Next.js storefront for a perfume collection. Customers add perfumes to a cart and check out on WhatsApp: the order details are pre-filled in a message to the perfume's dealer.
 
@@ -19,10 +19,30 @@ Deploy the `out/` folder to any static host (Vercel, Netlify, S3, Nginx).
 
 | Variable | Purpose |
 | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Public URL, used in metadata and order links |
+| `NEXT_PUBLIC_SITE_URL` | Public URL (e.g. `https://sevynperfumes.com`). Used for canonical links, the sitemap, share images and order links. Must be set before `npm run build` |
+| `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | Optional. Code from Google Search Console (HTML tag method) |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | Fallback dealer number (digits only, with country code) |
 
 Each perfume has its own `dealer.whatsappNumber` in the data. The fallback is used only when that is empty.
+
+## SEO
+
+Built in, generated at build time:
+
+- Title, description, keywords, canonical link, Open Graph and X (Twitter) tags on every page (`src/app/layout.tsx`, `src/app/perfumes/[slug]/page.tsx`)
+- Structured data (JSON-LD) for Google: store, website, product list, and per perfume Product (prices, stock, rating, reviews) and breadcrumbs (`src/lib/structured-data.ts`)
+- `/sitemap.xml`, `/robots.txt` and `/manifest.webmanifest` (`src/app/sitemap.ts`, `robots.ts`, `manifest.ts`)
+- Share images for WhatsApp, Instagram, Facebook and X at `/og/site.png` and `/og/<slug>.png` (`src/lib/og-images.tsx`)
+- Favicon and app icons from the logo "7" (`src/app/favicon.ico`, `icon.svg`, `apple-icon.png`, `public/icon-*.png`)
+
+After the first deploy:
+
+1. Set `NEXT_PUBLIC_SITE_URL` to the real domain and rebuild (otherwise the sitemap and links point to localhost).
+2. Add the site in [Google Search Console](https://search.google.com/search-console), verify it, and submit `https://<domain>/sitemap.xml`.
+3. Check a perfume page in the [Rich Results Test](https://search.google.com/test/rich-results).
+4. Create a Google Business Profile for SEVYN Perfumes so the brand shows on Maps and in local results.
+
+Ratings and reviews are sent to Google as structured data. Google only allows real reviews there, so replace the sample reviews in `reviews.data.ts` with real ones before going live.
 
 ## Project structure
 

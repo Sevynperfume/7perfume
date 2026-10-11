@@ -113,7 +113,7 @@ export function BrandStory({ stats }: { stats: HeroStats }) {
           </Reveal>
           <Reveal delay={150}>
             <p className="mt-6 max-w-lg leading-relaxed text-[#f5ede2]/70">
-              Every 7 Seven fragrance starts with a single ingredient we love: a Damask rose, a piece of aged oud, a
+              Every SEVYN fragrance starts with a single ingredient we love: a Damask rose, a piece of aged oud, a
               sun-warmed lemon. We blend in small batches, rest each perfume for weeks, and bottle it by hand.
             </p>
           </Reveal>
