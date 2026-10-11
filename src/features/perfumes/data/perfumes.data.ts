@@ -89,7 +89,7 @@ export const perfumes: Perfume[] = [
     description:
       "Loud in the best way. Bombastic starts with sparkling bergamot, crackling black pepper and bay leaf, then pours on dark rum and cinnamon warmed by clary sage, African geranium and woods. The base is pure night-out: supple leather, incense smoke, resinous benzoin, patchouli and cedar.",
     stock: 18,
-    gender: "Men",
+    gender: "Unisex",
     family: "amber",
     tint: "#9b2c33",
     variants: variants("bombastic", "Bombastic"),
@@ -113,7 +113,7 @@ export const perfumes: Perfume[] = [
     description:
       "Clean, confident and effortlessly polished. Daddy opens with mint, sparkling aldehydes, lavender and a bright citrus burst of bergamot, mandarin and lemon, lifted by artemisia and neroli. The heart blends airy seagrass and ginger with jasmine, geranium, rosewood, cyclamen and rose, before settling on musk, sandalwood, cedar, guaiac wood and amber.",
     stock: 22,
-    gender: "Men",
+    gender: "Unisex",
     family: "fresh",
     tint: "#3d5a78",
     variants: variants("daddy", "Daddy"),
@@ -167,7 +167,7 @@ export const perfumes: Perfume[] = [
     description:
       "Rich, spiced and quietly opulent. Plump Me Up opens with fresh, sweet orange, then turns warm with spicy pink peppercorn and leathery saffron. Deep, woody agarwood (oud) carries it for hours, made for evenings and special occasions.",
     stock: 12,
-    gender: "Unisex",
+    gender: "For Her",
     family: "woody",
     tint: "#75469a",
     variants: variants("plump-me-up", "Plump Me Up"),
@@ -191,7 +191,7 @@ export const perfumes: Perfume[] = [
     description:
       "Charm, bottled. Rizz-Aro opens with aromatic cardamom, melts into a smooth toffee and caramel accord, and settles on warm, glowing amberwood. Sweet without being sugary, it is a close, cosy gourmand for date nights.",
     stock: 20,
-    gender: "Men",
+    gender: "Unisex",
     family: "amber",
     tint: "#b8863b",
     variants: variants("rizz-aro", "Rizz-Aro"),
@@ -215,7 +215,7 @@ export const perfumes: Perfume[] = [
     description:
       "Soft, romantic and impossible to ignore. Sweet Talk opens with velvety white peach and tangy black currant, blooms into violet and Egyptian jasmine, and dries down to creamy Madagascar vanilla wrapped in clean white musk.",
     stock: 28,
-    gender: "Women",
+    gender: "For Her",
     family: "floral",
     tint: "#c98b86",
     variants: variants("sweet-talk", "Sweet Talk"),
