@@ -77,23 +77,17 @@ export function PerfumeDetails({ perfume }: { perfume: Perfume }) {
               </Tabs>
             </div>
 
-            <dl className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <dt className="text-xs tracking-widest text-muted-foreground uppercase">Price</dt>
-                <dd>
-                  <PriceTag price={variant.price} mrp={variant.mrp} size="lg" />
-                </dd>
-                <dd className="text-xs text-muted-foreground">
-                  {variant.sizeLabel}, inclusive of taxes &middot; you save {formatPrice(variant.mrp - variant.price)}
-                </dd>
-              </div>
-              <div className="space-y-1">
-                <dt className="text-xs tracking-widest text-muted-foreground uppercase">Quantity available</dt>
-                <dd className="text-3xl font-semibold tabular-nums">{perfume.stock}</dd>
-                <dd>
-                  <StockBadge stock={perfume.stock} />
-                </dd>
-              </div>
+            <dl className="space-y-1">
+              <dt className="text-xs tracking-widest text-muted-foreground uppercase">Price</dt>
+              <dd>
+                <PriceTag price={variant.price} mrp={variant.mrp} size="lg" />
+              </dd>
+              <dd className="text-xs text-muted-foreground">
+                {variant.sizeLabel}, inclusive of taxes &middot; you save {formatPrice(variant.mrp - variant.price)}
+              </dd>
+              <dd className="pt-1">
+                <StockBadge stock={perfume.stock} />
+              </dd>
             </dl>
 
             <Separator />
