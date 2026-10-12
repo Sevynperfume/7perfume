@@ -19,7 +19,7 @@ Deploy the `out/` folder to any static host (Vercel, Netlify, S3, Nginx).
 
 | Variable | Purpose |
 | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Public URL (e.g. `https://sevynperfumes.com`). Used for canonical links, the sitemap, share images and order links. Must be set before `npm run build` |
+| `NEXT_PUBLIC_SITE_URL` | Public URL (e.g. `https://sevynperfumes.com`). Used for canonical links, the sitemap, share images and order links. Read at build time. On Vercel it defaults to the project production domain; set it when you use your own domain |
 | `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | Optional. Code from Google Search Console (HTML tag method) |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | Fallback dealer number (digits only, with country code) |
 
@@ -37,7 +37,9 @@ Built in, generated at build time:
 
 After the first deploy:
 
-1. Set `NEXT_PUBLIC_SITE_URL` to the real domain and rebuild (otherwise the sitemap and links point to localhost).
+1. If you use your own domain, set `NEXT_PUBLIC_SITE_URL` to it in Vercel (Settings > Environment Variables) and redeploy. Outside Vercel it must always be set, or links point to localhost.
+   Check the preview with the [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) (press "Scrape Again"). WhatsApp caches previews per link, so test with a new link such as `https://<domain>/?v=2`.
+   Preview deployments with Vercel Deployment Protection show Vercel's login page to WhatsApp, so share the production URL.
 2. Add the site in [Google Search Console](https://search.google.com/search-console), verify it, and submit `https://<domain>/sitemap.xml`.
 3. Check a perfume page in the [Rich Results Test](https://search.google.com/test/rich-results).
 4. Create a Google Business Profile for SEVYN Perfumes so the brand shows on Maps and in local results.

@@ -3,8 +3,16 @@ export const siteConfig = {
   shortName: "SEVYN",
   description:
     "Shop SEVYN Extrait de Parfum online in India. Long-lasting luxury perfumes for her and unisex scents in 50 ml, 30 ml and pocket sizes from Rs 150. Order on WhatsApp.",
-  /** Public URL without a trailing slash. Set NEXT_PUBLIC_SITE_URL before building for production. */
-  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/+$/, ""),
+  /**
+   * Public URL without a trailing slash. Share previews and the sitemap need the real domain.
+   * Order: NEXT_PUBLIC_SITE_URL, then the production domain Vercel provides at build time, then localhost.
+   */
+  url: (
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`
+      : "http://localhost:3000")
+  ).replace(/\/+$/, ""),
   /** Other names people search for, used in metadata and structured data. */
   alternateNames: ["SEVYN", "Sevyn Perfumes", "7EVYN"],
   keywords: [
