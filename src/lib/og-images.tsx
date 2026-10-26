@@ -39,10 +39,17 @@ export function siteOgImage() {
   );
 }
 
-/** Bottle photo embedded in the 50 ml cover image (/public/images/perfumes/<slug>/1.svg). */
+/**
+ * Small JPEG of the bottle close-up (/public/images/perfumes/<slug>/share.jpg). The gallery photos are AVIF,
+ * which the share image renderer cannot read.
+ */
 async function bottlePhoto(slug: string) {
-  const svg = await readFile(join(process.cwd(), "public/images/perfumes", slug, "1.svg"), "utf8");
-  return svg.match(/data:image\/(?:jpeg|png);base64,[A-Za-z0-9+/=]+/)?.[0] ?? null;
+  try {
+    const jpg = await readFile(join(process.cwd(), "public/images/perfumes", slug, "share.jpg"));
+    return `data:image/jpeg;base64,${jpg.toString("base64")}`;
+  } catch {
+    return null;
+  }
 }
 
 export async function perfumeOgImage(perfume: Perfume) {
@@ -67,7 +74,7 @@ export async function perfumeOgImage(perfume: Perfume) {
         <div style={{ width: 440, height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
           {photo && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={photo} width={330} height={440} style={{ objectFit: "cover", borderRadius: 24 }} alt="" />
+            <img src={photo} width={240} height={320} style={{ objectFit: "cover", borderRadius: 24 }} alt="" />
           )}
         </div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 22, paddingRight: 64 }}>

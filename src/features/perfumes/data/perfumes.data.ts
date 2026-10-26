@@ -1,23 +1,37 @@
 import { perfumeImage } from "@/lib/perfume-image";
-import type { Dealer, FragranceNote, NoteFamily, NoteLayer, Perfume, PerfumeImage, PerfumeVariant } from "../types";
+import type { Dealer, FragranceNote, NoteFamily, NoteLayer, Perfume, PerfumeImage, PerfumeVariant, VariantId } from "../types";
 
 // Mock data. Replace with a database query inside perfume.service.ts.
 // Notes come from the SEVYN fragrance sheets in /public/seven_perfumes/*_fragnance.svg.
 // Stock is a placeholder: update it with the real values.
 
-// Gallery order: the first image is the cover used on cards, the carousel and the cart.
-const views = [
-  { file: "1.svg", label: "front view" },
+type View = { file: string; label: string };
+
+// Real product photos per size, relative to /images/perfumes/<slug>/. The first one is the cover
+// used on cards, the carousel and the cart.
+const PHOTOS: Record<VariantId, View[]> = {
+  "50ml": [
+    { file: "photo.svg", label: "bottle with box" },
+    { file: "bottle.svg", label: "bottle close-up" },
+  ],
+  "30ml": [
+    { file: "30ml/photo.svg", label: "bottle with box" },
+    { file: "bottle.svg", label: "bottle close-up" },
+  ],
+  pocket: [{ file: "pocket/photo.svg", label: "pocket spray" }],
+};
+
+// Generated cards shown after the photos, taken from each size's own folder.
+const CARDS: View[] = [
   { file: "notes.svg", label: "fragrance notes" },
-  { file: "2.svg", label: "editorial portrait" },
-  { file: "3.svg", label: "studio shot" },
   { file: "4.svg", label: "scent profile" },
 ];
 
 /** Images live in /images/perfumes/<slug>/ (50 ml), .../30ml/ and .../pocket/. */
-function gallery(slug: string, name: string, dir = "", size = "50 ml"): PerfumeImage[] {
-  return views.map((view) => ({
-    src: perfumeImage(slug, dir ? `${dir}/${view.file}` : view.file),
+function gallery(slug: string, name: string, size: string, dir: string, photos: View[]): PerfumeImage[] {
+  const cards = CARDS.map((card) => ({ ...card, file: dir ? `${dir}/${card.file}` : card.file }));
+  return [...photos, ...cards].map((view) => ({
+    src: perfumeImage(slug, view.file),
     alt: `${name}, ${size}, ${view.label}`,
   }));
 }
@@ -29,8 +43,13 @@ const SIZES = [
   { id: "pocket", label: "Pocket", sizeLabel: "Pocket size", mrp: 250, price: 150, dir: "pocket" },
 ] as const;
 
-function variants(slug: string, name: string): PerfumeVariant[] {
-  return SIZES.map(({ dir, ...size }) => ({ ...size, images: gallery(slug, name, dir, size.sizeLabel) }));
+/** Variants plus the default size's gallery. `photos` replaces the standard photos of a size. */
+function media(slug: string, name: string, photos: Partial<Record<VariantId, View[]>> = {}) {
+  const variants: PerfumeVariant[] = SIZES.map(({ dir, ...size }) => ({
+    ...size,
+    images: gallery(slug, name, size.sizeLabel, dir, photos[size.id] ?? PHOTOS[size.id]),
+  }));
+  return { variants, images: variants[0].images };
 }
 
 /** Builds the notes list from "Name:family" pairs per layer. */
@@ -68,8 +87,10 @@ export const perfumes: Perfume[] = [
     gender: "Unisex",
     family: "fresh",
     tint: "#3a9cc4",
-    variants: variants("beach-please", "Beach Please"),
-    images: gallery("beach-please", "Beach Please"),
+    ...media("beach-please", "Beach Please", {
+      // No pocket photo yet: keep the generated pocket image.
+      pocket: [{ file: "pocket/1.svg", label: "pocket size" }],
+    }),
     notes: notes({
       top: ["Citron:citrus", "Lemon:citrus", "Mint:fresh"],
       heart: ["Apricot:fruity", "Basil:green"],
@@ -87,17 +108,16 @@ export const perfumes: Perfume[] = [
     name: "Bombastic",
     tagline: "Rum, leather and smoky incense",
     description:
-      "Loud in the best way. Bombastic starts with sparkling bergamot, crackling black pepper and bay leaf, then pours on dark rum and cinnamon warmed by clary sage, African geranium and woods. The base is pure night-out: supple leather, incense smoke, resinous benzoin, patchouli and cedar.",
+      "Loud in the best way. Bombastic starts with sparkling bergamot and crackling black pepper, then pours on dark rum and warm cinnamon. The base is pure night-out: supple leather, incense smoke and earthy patchouli.",
     stock: 18,
     gender: "Unisex",
     family: "amber",
     tint: "#9b2c33",
-    variants: variants("bombastic", "Bombastic"),
-    images: gallery("bombastic", "Bombastic"),
+    ...media("bombastic", "Bombastic"),
     notes: notes({
-      top: ["Bergamot:citrus", "Black Pepper:spicy", "Bay Leaf:green"],
-      heart: ["Rum:sweet", "Cinnamon:spicy", "Clary Sage:green", "African Geranium:floral", "Woody Notes:woody"],
-      base: ["Leather:woody", "Incense:spicy", "Benzoin:sweet", "Patchouli:green", "Cedar:woody"],
+      top: ["Bergamot:citrus", "Black Pepper:spicy"],
+      heart: ["Rum:sweet", "Cinnamon:spicy"],
+      base: ["Leather:woody", "Incense:spicy", "Patchouli:green"],
     }),
     featured: true,
     rating: 4.8,
@@ -109,25 +129,18 @@ export const perfumes: Perfume[] = [
     id: "p-003",
     slug: "daddy",
     name: "Daddy",
-    tagline: "Crisp citrus over sandalwood and amber",
+    tagline: "Cool mint, lavender and sandalwood",
     description:
-      "Clean, confident and effortlessly polished. Daddy opens with mint, sparkling aldehydes, lavender and a bright citrus burst of bergamot, mandarin and lemon, lifted by artemisia and neroli. The heart blends airy seagrass and ginger with jasmine, geranium, rosewood, cyclamen and rose, before settling on musk, sandalwood, cedar, guaiac wood and amber.",
+      "Clean, confident and effortlessly polished. Daddy opens with cool mint, bright bergamot and lavender, moves into airy seagrass and a warm kick of ginger, then settles on soft musk and creamy sandalwood.",
     stock: 22,
     gender: "Unisex",
     family: "fresh",
     tint: "#3d5a78",
-    variants: variants("daddy", "Daddy"),
-    images: gallery("daddy", "Daddy"),
+    ...media("daddy", "Daddy"),
     notes: notes({
-      top: [
-        "Mint:fresh", "Aldehydes:fresh", "Lavender:floral", "Bergamot:citrus",
-        "Mandarin Orange:citrus", "Lemon:citrus", "Artemisia:green", "Neroli:floral",
-      ],
-      heart: [
-        "Seagrass:fresh", "Ginger:spicy", "Jasmine:floral", "Geranium:floral",
-        "Brazilian Rosewood:woody", "Cyclamen:floral", "Rose:floral",
-      ],
-      base: ["Musk:musky", "Sandalwood:woody", "Cedar:woody", "Guaiac Wood:woody", "Amber:sweet"],
+      top: ["Mint:fresh", "Bergamot:citrus", "Lavender:floral"],
+      heart: ["Seagrass:fresh", "Ginger:spicy"],
+      base: ["Musk:musky", "Sandalwood:woody"],
     }),
     featured: true,
     rating: 4.7,
@@ -146,8 +159,7 @@ export const perfumes: Perfume[] = [
     gender: "Unisex",
     family: "fresh",
     tint: "#7d9a3c",
-    variants: variants("pista-la-vista", "Pista La Vista"),
-    images: gallery("pista-la-vista", "Pista La Vista"),
+    ...media("pista-la-vista", "Pista La Vista"),
     notes: notes({
       top: ["Lemon:citrus", "Armoise:green", "Pineapple:fruity"],
       heart: ["Apple:fruity", "Violet:floral", "Labdanum:sweet"],
@@ -170,8 +182,7 @@ export const perfumes: Perfume[] = [
     gender: "For Her",
     family: "woody",
     tint: "#75469a",
-    variants: variants("plump-me-up", "Plump Me Up"),
-    images: gallery("plump-me-up", "Plump Me Up"),
+    ...media("plump-me-up", "Plump Me Up"),
     notes: notes({
       top: ["Sweet Orange:citrus"],
       heart: ["Pink Peppercorn:spicy", "Saffron:spicy"],
@@ -194,8 +205,7 @@ export const perfumes: Perfume[] = [
     gender: "Unisex",
     family: "amber",
     tint: "#b8863b",
-    variants: variants("rizz-aro", "Rizz-Aro"),
-    images: gallery("rizz-aro", "Rizz-Aro"),
+    ...media("rizz-aro", "Rizz-Aro"),
     notes: notes({
       top: ["Cardamom:spicy"],
       heart: ["Toffee (Caramel):sweet"],
@@ -218,8 +228,13 @@ export const perfumes: Perfume[] = [
     gender: "For Her",
     family: "floral",
     tint: "#c98b86",
-    variants: variants("sweet-talk", "Sweet Talk"),
-    images: gallery("sweet-talk", "Sweet Talk"),
+    ...media("sweet-talk", "Sweet Talk", {
+      "30ml": [
+        { file: "30ml/photo.svg", label: "bottle with box" },
+        { file: "30ml/photo-2.svg", label: "bottle with box, side view" },
+        { file: "bottle.svg", label: "bottle close-up" },
+      ],
+    }),
     notes: notes({
       top: ["White Peach:fruity", "Black Currant:fruity"],
       heart: ["Violet:floral", "Egyptian Jasmine:floral"],
