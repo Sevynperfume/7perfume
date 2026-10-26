@@ -87,10 +87,7 @@ export const perfumes: Perfume[] = [
     gender: "Unisex",
     family: "fresh",
     tint: "#3a9cc4",
-    ...media("beach-please", "Beach Please", {
-      // No pocket photo yet: keep the generated pocket image.
-      pocket: [{ file: "pocket/1.svg", label: "pocket size" }],
-    }),
+    ...media("beach-please", "Beach Please"),
     notes: notes({
       top: ["Citron:citrus", "Lemon:citrus", "Mint:fresh"],
       heart: ["Apricot:fruity", "Basil:green"],
