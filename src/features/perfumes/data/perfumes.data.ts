@@ -7,31 +7,29 @@ import type { Dealer, FragranceNote, NoteFamily, NoteLayer, Perfume, PerfumeImag
 
 type View = { file: string; label: string };
 
-// Real product photos per size, relative to /images/perfumes/<slug>/. The first one is the cover
-// used on cards, the carousel and the cart.
-const PHOTOS: Record<VariantId, View[]> = {
-  "50ml": [
-    { file: "photo.svg", label: "bottle with box" },
-    { file: "bottle.svg", label: "bottle close-up" },
-  ],
-  "30ml": [
-    { file: "30ml/photo.svg", label: "bottle with box" },
-    { file: "bottle.svg", label: "bottle close-up" },
-  ],
-  pocket: [{ file: "pocket/photo.svg", label: "pocket spray" }],
-};
-
-// Generated cards shown after the photos, taken from each size's own folder.
-const CARDS: View[] = [
+// Gallery per size, relative to that size's folder. The first image is the cover used on cards, the carousel
+// and the cart. Bottle sizes use the studio set; the pocket size uses its real photo.
+const STUDIO: View[] = [
+  { file: "1.svg", label: "front view" },
   { file: "notes.svg", label: "fragrance notes" },
+  { file: "2.svg", label: "editorial portrait" },
+  { file: "3.svg", label: "studio shot" },
   { file: "4.svg", label: "scent profile" },
 ];
+const VIEWS: Record<VariantId, View[]> = {
+  "50ml": STUDIO,
+  "30ml": STUDIO,
+  pocket: [
+    { file: "photo.svg", label: "pocket spray" },
+    { file: "notes.svg", label: "fragrance notes" },
+    { file: "4.svg", label: "scent profile" },
+  ],
+};
 
 /** Images live in /images/perfumes/<slug>/ (50 ml), .../30ml/ and .../pocket/. */
-function gallery(slug: string, name: string, size: string, dir: string, photos: View[]): PerfumeImage[] {
-  const cards = CARDS.map((card) => ({ ...card, file: dir ? `${dir}/${card.file}` : card.file }));
-  return [...photos, ...cards].map((view) => ({
-    src: perfumeImage(slug, view.file),
+function gallery(slug: string, name: string, size: string, dir: string, views: View[]): PerfumeImage[] {
+  return views.map((view) => ({
+    src: perfumeImage(slug, dir ? `${dir}/${view.file}` : view.file),
     alt: `${name}, ${size}, ${view.label}`,
   }));
 }
@@ -43,11 +41,11 @@ const SIZES = [
   { id: "pocket", label: "Pocket", sizeLabel: "Pocket size", mrp: 250, price: 150, dir: "pocket" },
 ] as const;
 
-/** Variants plus the default size's gallery. `photos` replaces the standard photos of a size. */
-function media(slug: string, name: string, photos: Partial<Record<VariantId, View[]>> = {}) {
+/** Variants plus the default size's gallery. */
+function media(slug: string, name: string) {
   const variants: PerfumeVariant[] = SIZES.map(({ dir, ...size }) => ({
     ...size,
-    images: gallery(slug, name, size.sizeLabel, dir, photos[size.id] ?? PHOTOS[size.id]),
+    images: gallery(slug, name, size.sizeLabel, dir, VIEWS[size.id]),
   }));
   return { variants, images: variants[0].images };
 }
@@ -225,13 +223,7 @@ export const perfumes: Perfume[] = [
     gender: "For Her",
     family: "floral",
     tint: "#c98b86",
-    ...media("sweet-talk", "Sweet Talk", {
-      "30ml": [
-        { file: "30ml/photo.svg", label: "bottle with box" },
-        { file: "30ml/photo-2.svg", label: "bottle with box, side view" },
-        { file: "bottle.svg", label: "bottle close-up" },
-      ],
-    }),
+    ...media("sweet-talk", "Sweet Talk"),
     notes: notes({
       top: ["White Peach:fruity", "Black Currant:fruity"],
       heart: ["Violet:floral", "Egyptian Jasmine:floral"],
