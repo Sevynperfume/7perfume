@@ -17,7 +17,7 @@ const sizes = {
   lg: { price: "text-3xl", mrp: "text-lg", badge: "text-xs px-2.5 py-0.5" },
 };
 
-/** Selling price with the regular price struck through, e.g. ~~₹1,200~~ ₹699 42% off. */
+/** Selling price with the regular price struck through, e.g. ~~₹1,200~~ ₹599 50% off. */
 export function PriceTag({ price, mrp, size = "md", showSaving = true, className }: PriceTagProps) {
   const discounted = mrp !== undefined && mrp > price;
   const off = discounted ? Math.round(((mrp - price) / mrp) * 100) : 0;

@@ -36,8 +36,8 @@ function gallery(slug: string, name: string, size: string, dir: string, views: V
 
 /** Same sizes and prices for every perfume. mrp is the regular price shown struck through. */
 const SIZES = [
-  { id: "50ml", label: "50 ml", sizeLabel: "50 ml", mrp: 1200, price: 699, dir: "" },
-  { id: "30ml", label: "30 ml", sizeLabel: "30 ml", mrp: 800, price: 350, dir: "30ml" },
+  { id: "50ml", label: "50 ml", sizeLabel: "50 ml", mrp: 1200, price: 599, dir: "" },
+  { id: "30ml", label: "30 ml", sizeLabel: "30 ml", mrp: 800, price: 299, dir: "30ml" },
   { id: "pocket", label: "Pocket", sizeLabel: "Pocket size", mrp: 250, price: 150, dir: "pocket" },
 ] as const;
 
